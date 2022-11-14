@@ -1,0 +1,62 @@
+# Install and activate these 4 packages in RStudio
+
+lapply(c("quantmod", "PortfolioAnalytics", "timeSeries", "fBasics"), require, character.only = TRUE)
+
+# Then, select stocks you want to get data of
+
+tickers <- c("1801.HK","6618.HK","1093.HK","1177.HK","2269.HK")
+
+portfolioPrices <- NULL
+for (Ticker in tickers) 
+  portfolioPrices <- cbind(portfolioPrices,
+                                 getSymbols(Ticker, from = "2017-10-17", src = "yahoo", auto.assign=FALSE)[,4])
+
+
+portfolioPrices <- portfolioPrices[apply(portfolioPrices,1,function(x) all(!is.na(x))),]
+
+colnames(portfolioPrices) <- tickers
+
+portfolioReturns <- ROC(portfolioPrices, type = "discrete")
+portfolioReturns <-as.timeSeries(portfolioPrices)
+
+
+options(max.print=1000000)
+portfolioReturns
+
+# Of course you want to get returns
+
+lrtn=diff(log(portfolioReturns))
+lrtn <- lrtn[-1,]
+
+# mean/average
+
+colMeans(lrtn)
+
+# In case you need yearly mean/average
+
+yearlymean <-252*colMeans(lrtn)
+yearlymean
+options(max.print=1000000)
+
+# standard deviation
+
+sapply(lrtn, sd)
+
+# Yearly standard deviation
+
+yearlysd <- 252^0.5*sapply(lrtn, sd)
+yearlysd
+
+# If you need more than previous statistical measures, you can also use skewness and kurtosis
+
+colSkewness(lrtn, pvalue = FALSE)
+colKurtosis(lrtn, pvalue = FALSE)
+
+# If you would like to know correlation between stocks
+
+cor(lrtn)
+
+# For those who need returns' histogram with normal distribution 
+pdf("myfile.pdf")
+histPlot(lrtn)
+dev.off()
