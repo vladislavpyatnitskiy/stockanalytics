@@ -5,13 +5,14 @@ lapply(c("quantmod", "PortfolioAnalytics", "timeSeries", "fBasics"), require, ch
 # Then, select tickers of stocks you want to get data of (here are used tickers of Hong Kong stocks)
 
 tickers <- c("1801.HK","6618.HK","1093.HK","1177.HK","2269.HK")
+start_date <- "2017-10-17"
 
 # Here you can set up time period that you would like to analyse
 
 portfolioPrices <- NULL
 for (Ticker in tickers) 
   portfolioPrices <- cbind(portfolioPrices,
-                                 getSymbols(Ticker, from = "2017-10-17", src = "yahoo", auto.assign=FALSE)[,4])
+                                 getSymbols(Ticker, start_date, src = "yahoo", auto.assign=FALSE)[,4])
 
 
 portfolioPrices <- portfolioPrices[apply(portfolioPrices,1,function(x) all(!is.na(x))),]
