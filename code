@@ -12,7 +12,7 @@ start_date <- "2017-10-17"
 portfolioPrices <- NULL
 for (Ticker in tickers) 
   portfolioPrices <- cbind(portfolioPrices,
-                                 getSymbols(Ticker, start_date, src = "yahoo", auto.assign=FALSE)[,4])
+                                 getSymbols(Ticker, from = start_date, src = "yahoo", auto.assign=FALSE)[,4])
 
 
 portfolioPrices <- portfolioPrices[apply(portfolioPrices,1,function(x) all(!is.na(x))),]
