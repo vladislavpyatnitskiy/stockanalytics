@@ -41,6 +41,10 @@ stats1 <- t(apply(lrtn, 2, function(lrtn) c(mean(lrtn), sd(lrtn), skewness(lrtn)
 colnames(stats1) <- c("Mean", "SD", "Skewness", "Kurtosis")
 stats1  
 
+# To calculate Sharpe Ratio
+
+t(SharpeRatio(lrtn, Rf = 0.03, p=0.95))
+
 # If you would like to know correlation between stocks
 
 cor(lrtn)
