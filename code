@@ -22,9 +22,9 @@ colnames(portfolioPrices) <- tickers
 portfolioReturns <- ROC(portfolioPrices, type = "discrete")
 portfolioReturns <-as.timeSeries(portfolioPrices)
 
+# Get first values of stock prices
 
-options(max.print=1000000)
-portfolioReturns
+head(portfolioReturns)
 
 # Of course you want to get returns
 
