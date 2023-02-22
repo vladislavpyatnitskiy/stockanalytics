@@ -31,29 +31,11 @@ portfolioReturns
 lrtn=diff(log(portfolioReturns))
 lrtn <- lrtn[-1,]
 
-# mean/average
+# To calculate basic stats in one matrix (Mean, Standard deviation, Skewness and Kurtosis)
 
-colMeans(lrtn)
-
-# In case you need yearly mean/average
-
-yearlymean <-252*colMeans(lrtn)
-yearlymean
-options(max.print=1000000)
-
-# standard deviation
-
-sapply(lrtn, sd)
-
-# Yearly standard deviation
-
-yearlysd <- 252^0.5*sapply(lrtn, sd)
-yearlysd
-
-# If you need more than previous statistical measures, you can also use skewness and kurtosis
-
-colSkewness(lrtn, pvalue = FALSE)
-colKurtosis(lrtn, pvalue = FALSE)
+stats1 <- t(apply(lrtn, 2, function(lrtn) c(mean(lrtn), sd(lrtn), skewness(lrtn), kurtosis(lrtn))))
+colnames(stats1) <- c("Mean", "SD", "Skewness", "Kurtosis")
+stats1  
 
 # If you would like to know correlation between stocks
 
