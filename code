@@ -13,7 +13,10 @@ tickers <- c("1801.HK",
              "6618.HK",
              "1093.HK",
              "1177.HK",
-             "2269.HK")
+             "2269.HK"
+             )
+             
+# Set up any start date you need  
 start_date <- "2017-10-17"
 
 # Here you can set up time period that you would like to analyse
