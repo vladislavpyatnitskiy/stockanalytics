@@ -64,7 +64,10 @@ colnames(stats1) <- c("Mean",
 stats1   
 
 # To calculate Sharpe Ratio
-t(SharpeRatio(lrtn, Rf = 0.03, p=0.95))
+t(SharpeRatio(lrtn,
+              Rf = 0.05,
+              p=0.95)
+  )
 
 # If you would like to know correlation between stocks
 cor(lrtn)
