@@ -2,9 +2,11 @@
 lapply(c("quantmod",
          "PortfolioAnalytics",
          "timeSeries",
-         "fBasics"),
+         "fBasics"
+         ),
        require,
-       character.only = TRUE)
+       character.only = TRUE
+       )
 
 # Then, select tickers of stocks you want to get data of (here are used tickers of Hong Kong stocks)
 tickers <- c("1801.HK",
@@ -20,10 +22,15 @@ for (Ticker in tickers)
   portfolioPrices <- cbind(portfolioPrices,
                            getSymbols(Ticker,
                                       src = "yahoo",
-                                      auto.assign=FALSE)[,4])
+                                      auto.assign=FALSE
+                                      )[,4]
+                           )
 portfolioPrices <- portfolioPrices[apply(portfolioPrices,
                                          1,
-                                         function(x) all(!is.na(x))),]
+                                         function(x) all(!is.na(x)
+                                                         )
+                                         ),
+                                   ]
 colnames(portfolioPrices) <- tickers
 portfolioReturns <- ROC(portfolioPrices,
                         type = "discrete")
@@ -33,7 +40,9 @@ portfolioReturns <-as.timeSeries(portfolioPrices)
 head(portfolioReturns)
 
 # Of course you want to get returns
-lrtn=diff(log(portfolioReturns))
+lrtn=diff(log(portfolioReturns
+              )
+          )
 lrtn <- lrtn[-1,]
 
 # Check values
@@ -45,7 +54,10 @@ stats1 <- t(apply(lrtn,
                   function(lrtn) c(mean(lrtn),
                                             sd(lrtn),
                                             skewness(lrtn),
-                                            kurtosis(lrtn))))
+                                            kurtosis(lrtn)
+                                   )
+                  )
+            )
 colnames(stats1) <- c("Mean",
                       "SD",
                       "Skewness",
