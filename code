@@ -8,7 +8,7 @@ lapply(c("quantmod",
        character.only = TRUE
        )
 
-# Then, select tickers of stocks you want to get data of (here are used tickers of Hong Kong stocks)
+# Then, select tickers of stocks you want to get data of
 tickers <- c("1801.HK",
              "6618.HK",
              "1093.HK",
@@ -47,14 +47,16 @@ lrtn <- lrtn[-1,]
 # Check values
 head(lrtn)
 
-# To calculate basic stats in one matrix (Mean, Standard deviation, Skewness and Kurtosis)
+# To calculate basic stats in one matrix
 stats1 <- t(apply(lrtn,
                   2,
                   function(lrtn) c(mean(lrtn),
-                                   quantile(lrtn,na.rm = T,probs = c(0.25)
+                                   quantile(lrtn,na.rm = T,
+                                            probs = c(0.25)
                                             ),
                                    median(lrtn),
-                                   quantile(lrtn,na.rm = T,probs = c(0.75)
+                                   quantile(lrtn,na.rm = T,
+                                            probs = c(0.75)
                                             ),
                                             sd(lrtn),
                                             skewness(lrtn),
@@ -69,7 +71,7 @@ colnames(stats1) <- c("Mean",
                       "SD",
                       "Skewness",
                       "Kurtosis")
-stats1    
+stats1   
 
 # To calculate Sharpe Ratio
 t(SharpeRatio(lrtn,
