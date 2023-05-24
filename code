@@ -40,8 +40,7 @@ portfolioReturns <-as.timeSeries(portfolioPrices)
 head(portfolioReturns)
 
 # Of course you want to get returns
-lrtn=diff(log(portfolioReturns
-              )
+lrtn=diff(log(portfolioReturns)
           )
 lrtn <- lrtn[-1,]
 
