@@ -75,14 +75,16 @@ stats1
 # To calculate Sharpe Ratio
 t(SharpeRatio(lrtn,
               Rf = 0.05,
-              p=0.95)
+              p = 0.95
+              )
   )
 
 # If you would like to know correlation between stocks
 cor(lrtn)
 
 # Boxplot
-boxPlot(lrtn, main = "Hong Kong Stocks",
+boxPlot(lrtn,
+        main = "Hong Kong Stocks",
         title = FALSE,
         xlab = "Source: Yahoo Finance",
         ylab = "Returns"
