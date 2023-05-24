@@ -27,8 +27,7 @@ for (Ticker in tickers)
                            )
 portfolioPrices <- portfolioPrices[apply(portfolioPrices,
                                          1,
-                                         function(x) all(!is.na(x)
-                                                         )
+                                         function(x) all(!is.na(x))
                                          ),
                                    ]
 colnames(portfolioPrices) <- tickers
