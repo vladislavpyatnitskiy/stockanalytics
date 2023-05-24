@@ -53,11 +53,13 @@ head(lrtn)
 stats1 <- t(apply(lrtn,
                   2,
                   function(lrtn) c(mean(lrtn),
-                                   quantile(lrtn,na.rm = T,
+                                   quantile(lrtn,
+                                            na.rm = T,
                                             probs = c(0.25)
                                             ),
                                    median(lrtn),
-                                   quantile(lrtn,na.rm = T,
+                                   quantile(lrtn,
+                                            na.rm = T,
                                             probs = c(0.75)
                                             ),
                                             sd(lrtn),
