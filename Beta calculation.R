@@ -1,16 +1,28 @@
+# Function to generate beta values
 beta_values <- function(x){
-  x=diff(log(x))
-  x <- x[-1,]
   
-  market_return <- x$`^GSPC`
-  market_return
+  # Calculate returns
+  x=diff(log(x))[-1,]
   
-  stock_returns <- x[,1:(ncol(x) - 1)]
-  stock_returns
+  # Copy column S&P 500 column and make separate column
+  spx <- x[,"^GSPC"]
   
+  # Subset S&P 500 from data set
+  stock_returns <- x[, -which(names(x) == "^GSPC")]
+  
+  # Calculate Betas
   x <- apply(stock_returns,
         2,
-        function(col) ((lm((col) ~ market_return))$coefficients[2]))
-  x <- t(x)
+        function(col) ((lm((col) ~ spx))$coefficients[2]))
+  
+  # Transform into matrix 
+  x <- as.matrix(x)
+  
+  # Name column 
+  colnames(x) <- "Beta"
+  
+  # Display values
+  return(x)
 }
-View(beta_values(portfolioReturns))
+# Test             
+beta_values(portfolioReturns)
