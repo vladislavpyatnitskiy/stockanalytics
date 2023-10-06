@@ -1,23 +1,17 @@
-# Create function
-test_for_shapiro <- function(x){
+# Function for Shapiro Test
+test_for_shapiro <- function(x, lg = F){
   
-  # put column names for future matrix
-  columns_for_shapiro <- colnames(x)
+  #Calculate logs and remove NA if needed
+  if (isTRUE(lg)){ x = diff(log(x))[-1,] }
   
   # Create place to store values
   table_for_shapiro <- NULL
   
-  # For each column in matrix
-  for (n in 1:ncol(x)){
-    
-    # Find values of Shapiro
-    value_for_shapiro <- shapiro.test(x[,n])
-    
-    # Store them into matrix
-    table_for_shapiro <- cbind(table_for_shapiro, value_for_shapiro)
-  }
+  # For each column find values of Shapiro and store them into matrix
+  for (n in 1:ncol(x)){ table_for_shapiro <- cbind(table_for_shapiro,
+                                                   shapiro.test(x[,n])) }
   # Give it column names from original matrix
-  colnames(table_for_shapiro) <- columns_for_shapiro
+  colnames(table_for_shapiro) <- colnames(x)
   
   # Get rid of excess rows
   table_for_shapiro <- table_for_shapiro[1:(nrow(table_for_shapiro)-2),]
@@ -25,5 +19,5 @@ test_for_shapiro <- function(x){
   # Display values
   return(table_for_shapiro)
 }
-# Test it
-test_for_shapiro(lrtn)
+# Test
+test_for_shapiro(portfolioReturns, lg = T)
