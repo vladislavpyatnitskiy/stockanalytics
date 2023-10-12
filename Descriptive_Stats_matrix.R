@@ -13,6 +13,7 @@ stat_for_assets <- function(x, lg = F){
                                        quantile(x, na.rm = T, probs = c(0.9)),
                                        max(x),
                                        mean(x),
+                                       var(x),
                                        sd(x),
                                        skewness(x),
                                        kurtosis(x)
@@ -29,6 +30,7 @@ stat_for_assets <- function(x, lg = F){
                           "90%",
                           "Max",
                           "Mean",
+                          "Variance",
                           "SD",
                           "Skewness",
                           "Kurtosis")
