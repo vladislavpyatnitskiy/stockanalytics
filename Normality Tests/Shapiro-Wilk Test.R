@@ -1,11 +1,8 @@
 # Shapiro Test
-t.shapiro <- function(x, lg = F){
+t.shapiro <- function(x, lg = F, table = NULL){
   
   # Calculate logs and remove NA if needed
   if (isTRUE(lg)){ x = diff(log(x))[-1,] }
-  
-  # Create place to store values
-  table <- NULL
   
   # For each column find values of Shapiro and store them into matrix
   for (n in 1:ncol(x)){ table <- cbind(table, shapiro.test(x[,n])) }
