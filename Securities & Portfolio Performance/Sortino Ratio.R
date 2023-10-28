@@ -7,35 +7,34 @@ sortino.ratio <- function(y,tr10 = "^TNX",z = NULL,i = NULL,v.sortino = NULL){
   
   y <- c(y, tr10) # Add 10 year Treasuries to list
   
-  portfolioPrices <- NULL # Create an empty variable
+  p.Prices <- NULL # Create an empty variable
   
   # Loop for data extraction and set up statements for start and end date
   for (Ticker in y){ if (is.null(start_date) && is.null(end_date)) {
       
       # When neither start date nor end date are defined
-      portfolioPrices <- cbind(portfolioPrices,
-                               getSymbols(Ticker,
-                                          from = as.Date(Sys.Date()) - 365,
-                                          to = Sys.Date(),
-                                          src = "yahoo",
-                                          auto.assign=FALSE)[,4]) } else { 
+      p.Prices <- cbind(p.Prices,
+                        getSymbols(Ticker,
+                                   from = as.Date(Sys.Date()) - 365,
+                                   to = Sys.Date(),
+                                   src = "yahoo",
+                                   auto.assign=FALSE)[,4]) } else { 
                                             
       # When both start date and end date are defined
-      portfolioPrices <- cbind(portfolioPrices,
-                               getSymbols(Ticker, 
-                                          from = start_date,
-                                          to = end_date,
-                                          src = "yahoo", 
-                                          auto.assign=FALSE)[,4]) } }
+      p.Prices <- cbind(p.Prices,
+                        getSymbols(Ticker, 
+                                   from = start_date,
+                                   to = end_date,
+                                   src = "yahoo", 
+                                   auto.assign=FALSE)[,4]) } }
   # Get rid of NAs
-  portfolioPrices <- portfolioPrices[apply(portfolioPrices,1,
-                                           function(x) all(!is.na(x))),]
+  p.Prices <- p.Prices[apply(p.Prices,1,function(x) all(!is.na(x))),]
   
-  colnames(portfolioPrices) <- y # Put the tickers in data set
+  colnames(p.Prices) <- y # Put the tickers in data set
   
-  r <- ROC(portfolioPrices, type = "discrete") # Make data discrete
+  r <- ROC(p.Prices, type = "discrete") # Make data discrete
   
-  r <- diff(log(as.timeSeries(portfolioPrices)))[-1,] # Clean data for returns
+  r <- diff(log(as.timeSeries(p.Prices)))[-1,] # Clean data for returns
   
   rf <- apply(r[,tr10], 2, function(col) mean(col)) # Risk Free Rate
   
