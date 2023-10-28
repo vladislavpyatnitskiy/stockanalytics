@@ -3,120 +3,61 @@ library(quantmod)
 library(timeSeries)
 
 # Function to calculate Sortino Ratio
-sortino_ratio <- function(y, z = NULL, i = NULL){
-  # Define Yahoo ticker for 10 year Treasuries
-  tr10 <- "^TNX"
+sortino.ratio <- function(y,tr10 = "^TNX",z = NULL,i = NULL,v.sortino = NULL){
   
-  # Add 10 year Treasuries to list
-  y <- c(y, tr10)
+  y <- c(y, tr10) # Add 10 year Treasuries to list
   
-  # Create an empty variable
-  portfolioPrices <- NULL
+  portfolioPrices <- NULL # Create an empty variable
   
-  # Loop for data extraction
-  for (Ticker in y){
-    # Set up statements for start and end dates
-    if (is.null(z) && is.null(i)) {
+  # Loop for data extraction and set up statements for start and end date
+  for (Ticker in y){ if (is.null(start_date) && is.null(end_date)) {
+      
       # When neither start date nor end date are defined
       portfolioPrices <- cbind(portfolioPrices,
                                getSymbols(Ticker,
                                           from = as.Date(Sys.Date()) - 365,
                                           to = Sys.Date(),
                                           src = "yahoo",
-                                          auto.assign=FALSE)[,4])
-    } else if (is.null(i)) {
-      # When only start date is defined
-      portfolioPrices <- cbind(portfolioPrices,
-                               getSymbols(Ticker, from = z, src = "yahoo",
-                                          auto.assign=FALSE)[,4])
-    } else if (is.null(z)) {
-      # When only end date is defined
-      portfolioPrices <- cbind(portfolioPrices,
-                               getSymbols(Ticker, to = i, src = "yahoo",
-                                          auto.assign=FALSE)[,4])
-    } else { 
+                                          auto.assign=FALSE)[,4]) } else { 
+                                            
       # When both start date and end date are defined
       portfolioPrices <- cbind(portfolioPrices,
-                               getSymbols(Ticker, from = z, to = i,
+                               getSymbols(Ticker, 
+                                          from = start_date,
+                                          to = end_date,
                                           src = "yahoo", 
-                                          auto.assign=FALSE)[,4])
-    }
-  }
+                                          auto.assign=FALSE)[,4]) } }
   # Get rid of NAs
   portfolioPrices <- portfolioPrices[apply(portfolioPrices,1,
                                            function(x) all(!is.na(x))),]
-  # Put the tickers in data set
-  colnames(portfolioPrices) <- y
   
-  # Make data discrete
-  portfolioReturns <- ROC(portfolioPrices, type = "discrete")
+  colnames(portfolioPrices) <- y # Put the tickers in data set
   
-  # Make it time series
-  portfolioReturns <-as.timeSeries(portfolioPrices)
+  r <- ROC(portfolioPrices, type = "discrete") # Make data discrete
   
-  # Make logs and get rid of NA
-  portfolioReturns <- diff(log(portfolioReturns))[-1,]
+  r <- diff(log(as.timeSeries(portfolioPrices)))[-1,] # Clean data for returns
   
-  # Subtract treasuries from matrix
-  treasuries <- (portfolioReturns[,ncol(portfolioReturns)])
+  rf <- apply(r[,tr10], 2, function(col) mean(col)) # Risk Free Rate
   
-  # Calculate risk free return
-  treasuries <- apply(treasuries,
-                      2,
-                      function(col) mean(col))
+  s <- r[, -which(names(r) == tr10)] # Matrix with financial instruments
   
-  # Form matrix for other financial instruments
-  security_prices <- portfolioReturns[,1:(ncol(portfolioReturns)-1)]
+  r.mean <- apply(s, 2, function(col) mean(col)) # Calculate return
   
-  # Column names for Sortino
-  sortino_names <- colnames(security_prices)
-  
-  # Calculate return
-  mean_calculated <- apply(security_prices,
-                           2,
-                           function(col) mean(col))
-  
-  # Define new list name to contain Sharpe values
-  df_sortino <- NULL
-  
-  # Calculate Sortino ratio
-  for (k in 1:(ncol(security_prices))){
+  # Calculate Sortino ratio and calculate excess returns
+  for (k in 1:ncol(s)){ r.premium <- s[,k] - r.mean[k]
     
-    # Calculate excess returns
-    excess_ret_calculated <- security_prices[,k] - mean_calculated[k]
+    e.r <- mean(s[,k] - r.mean[k]) # Mean of Excessive returns
     
-    # Mean of Excessive returns
-    excess_ret_calculated_mean <- mean(excess_ret_calculated)
+    n.r <- (r.premium[r.premium < 0]) ^ 2 # Negative excessive returns and ^2
     
-    # Find negative excessive returns
-    Neg_exc_ret <- excess_ret_calculated[excess_ret_calculated < 0]
+    # Calculate Downside Risk, Sortino ratio and add to list
+    v.sortino<-rbind(v.sortino, ((e.r-rf)/(sum(n.r)/nrow(s))^(0.5))*252^0.5) }
     
-    # Square negative excessive returns
-    Neg_exc_ret <- ((Neg_exc_ret)^2)
-    
-    # Calculate Downside Risk
-    downside_risk <- ((sum(Neg_exc_ret))/(nrow(security_prices)))^(0.5)
-    
-    # Final calculation
-    final_sortino_coef <- ((excess_ret_calculated_mean - treasuries) /
-                            downside_risk) * (252^0.5)
-    
-    # Put values into list
-    df_sortino <- cbind(df_sortino, final_sortino_coef)
-  }
+  rownames(v.sortino) <- colnames(s) # Add tickers
   
-  # Add tickers
-  colnames(df_sortino) <- sortino_names
+  colnames(v.sortino) <- "Sortino" # Put name of ratio to column
   
-  # Put name of ratio to column
-  rownames(df_sortino) <- "Sortino"
-  
-  # Transpose
-  df_sortino <- t(df_sortino)
-  
-  # Display values
-  return(df_sortino)
+  return(v.sortino) # Display values
 }
 # Test
-tickers <- c("STLA", "UNM", "NVDA", "AAPL", "CVNA")
-sortino_ratio(tickers, "2022-09-01")
+sortino.ratio(c("STLA", "UNM", "NVDA", "AAPL", "CVNA"), z = "2022-09-01")
