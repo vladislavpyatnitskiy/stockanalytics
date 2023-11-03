@@ -1,67 +1,36 @@
+# Libraries 
+lapply(c("quantmod", "timeSeries"), require, character.only = TRUE)
+
 # Function to generate beta values
-beta_values <- function(y, bnchm = "^GSPC",
-                        start_date = NULL, end_date = NULL){
+c.beta <- function(y, bnchm = "^GSPC", s = NULL, e = NULL){
   
-  # Add benchmark to list
-  y <- c(y, bnchm)
+  y <- c(y, bnchm) # Add benchmark to list
   
-  # Create an empty variable
-  portfolioPrices <- NULL
+  p <- NULL # Create an empty variable
   
-  # Loop for data extraction
-  for (Ticker in y){
-    # Set up statements for start and end dates
-    if (is.null(start_date) && is.null(end_date)) {
+  # Loop for data extraction & Set up statements for start and end dates
+  for (Ticker in y){ if (is.null(s) && is.null(e)) {
+    
       # When neither start date nor end date are defined
-      portfolioPrices <- cbind(portfolioPrices,
-                               getSymbols(Ticker,
-                                          from = as.Date(Sys.Date()) - 365,
-                                          to = Sys.Date(),
-                                          src = "yahoo",
-                                          auto.assign=FALSE)[,4])
-    } else { 
+      p<-cbind(p,getSymbols(Ticker,from=as.Date(Sys.Date())-365,to=Sys.Date(),
+                            src = "yahoo", auto.assign=F)[,4]) } else { 
+                                 
       # When both start date and end date are defined
-      portfolioPrices <- cbind(portfolioPrices,
-                               getSymbols(Ticker,
-                                          from = start_date,
-                                          to = end_date,
-                                          src = "yahoo", 
-                                          auto.assign=FALSE)[,4]) }
-  }
-  # Get rid of NAs
-  portfolioPrices <- portfolioPrices[apply(portfolioPrices,1,
-                                           function(x) all(!is.na(x))),]
-  # Put the tickers in data set
-  colnames(portfolioPrices) <- y
+      p <- cbind(p, getSymbols(Ticker, from = s, to = e, src = "yahoo",
+                               auto.assign=F)[,4]) } }
   
-  # Make data discrete
-  portfolioReturns <- ROC(portfolioPrices, type = "discrete")
+  p <- p[apply(p,1, function(x) all(!is.na(x))),] # Get rid of NA
   
-  # Make it time series
-  portfolioReturns <-as.timeSeries(portfolioPrices)
+  colnames(p) <- y # Put the tickers in data set
   
-  # Calculate Returns and get rid of NA
-  x=diff(log(portfolioReturns))[-1,]
+  x=diff(log(as.timeSeries(p)))[-1,] # Calculate Returns and get rid of NA
   
-  # Copy column index column and make separate column
-  spx <- x[,bnchm]
+  beta <- as.matrix(apply(x[, -which(names(x) == bnchm)], 2, # Calculate Beta
+                    function(col) ((lm((col) ~ x[,bnchm]))$coefficients[2])))
   
-  # Subset index from data set
-  stock_returns <- x[, -which(names(x) == bnchm)]
+  colnames(beta) <- "Beta" # Name column 
   
-  # Calculate Betas
-  beta <- apply(stock_returns,
-                  2,
-                  function(col) ((lm((col) ~ spx))$coefficients[2]))
-  
-  # Transform into matrix 
-  beta <- as.matrix(beta)
-  
-  # Name column 
-  colnames(beta) <- "Beta"
-  
-  # Display values
-  return(beta)
+  return(beta) # Display values
 }
 # Test
-beta_values(tickers_for_test, bnchm = "^GSPC")
+c.beta(tickers_for_test, bnchm = "^GSPC")
