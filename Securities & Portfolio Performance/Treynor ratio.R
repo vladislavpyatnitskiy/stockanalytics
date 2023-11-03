@@ -1,89 +1,52 @@
 # Libraries
-library(quantmod)
-library(timeSeries)
+lapply(c("quantmod", "timeSeries"), require, character.only = TRUE)
 
 # Treynor script
-treynor_ratio <- function(y, tr10 = "^TNX", spx = "^GSPC",
-                          start_date = NULL, end_date = NULL){
+treynor.ratio <- function(y, tr10 = "^TNX", spx = "^GSPC",s = NULL, e = NULL){
   
-  # Add 10 year Treasuries to list
-  y <- c(y, tr10, spx)
+  y <- c(y, tr10, spx) # Add 10 year Treasuries to list
   
-  # Create an empty variable
-  portfolioPrices <- NULL
+  p <- NULL # Create an empty variable
   
-  # Loop for data extraction
-  for (Ticker in y){
+  for (Ticker in y){ if (is.null(s) && is.null(e)) { # Data upload
     
-    # Set up statements for start and end dates
-    if (is.null(start_date) && is.null(end_date)) {
-      
-      # When neither start date nor end date are defined
-      portfolioPrices <- cbind(portfolioPrices,
-                               getSymbols(Ticker,
-                                          from = as.Date(Sys.Date()) - 365,
-                                          to = Sys.Date(),
-                                          src = "yahoo",
-                                          auto.assign=FALSE)[,4]) } else { 
-                                            
-      # When both start date and end date are defined
-      portfolioPrices <- cbind(portfolioPrices,
-                               getSymbols(Ticker, from = start_date,
-                                          to = end_date,
-                                          src = "yahoo", 
-                                          auto.assign=FALSE)[,4]) } }
-  # Get rid of NAs
-  portfolioPrices <- portfolioPrices[apply(portfolioPrices,1,
-                                           function(x) all(!is.na(x))),]
-  # Put the tickers in data set
-  colnames(portfolioPrices) <- y
+    # When neither start date nor end date are defined
+    p<-cbind(p,getSymbols(Ticker,from=as.Date(Sys.Date())-365,to=Sys.Date(),
+                          src="yahoo",auto.assign=F)[,4])
+    
+    } else if (is.null(e)) { # When only start date is defined
+    
+    p <- cbind(p, getSymbols(Ticker,from=s,src="yahoo",auto.assign=F)[,4])
+    
+    } else if (is.null(s)) { # When only end date is defined
+    
+    p <- cbind(p, getSymbols(Ticker,to=e,src = "yahoo",auto.assign=F)[,4])
+    
+    } else { # When both start date and end date are defined
+    
+    p<-cbind(p,getSymbols(Ticker,from=s,to=e,src="yahoo",auto.assign=F)[,4])} }
   
-  # Make data discrete
-  portfolioReturns <- ROC(portfolioPrices, type = "discrete")
+  p <- p[apply(p, 1, function(x) all(!is.na(x))),] # Get rid of NA
   
-  # Make it time series
-  portfolioReturns <-as.timeSeries(portfolioPrices)
+  colnames(p) <- y # Put the tickers in data set
   
-  # Calculate risk free return
-  treasuries <- apply(portfolioReturns[,tr10], 2,
-                      function(col) mean(diff(log(col))))
+  p <- as.timeSeries(p) # Make it time series
   
-  # Form matrix for other financial instruments
-  security_prices <- portfolioReturns[,1:(ncol(portfolioReturns)-2)]
- 
-  # Calculate expected return
-  mean_calculated <- apply(security_prices, 2,
-                           function(col) mean(diff(log(col))))
+  rf <- apply(p[,tr10],2,function(col) mean(diff(log(col)))) # Risk Free Return
   
-  # Subtract index from matrix
-  spx_column <- portfolioReturns[,spx]
+  e.r<-apply(p[,1:(ncol(p)-2)],2,function(col) mean(diff(log(col)))) # Exp Ret
   
-  # Calculate logs of securities
-  security_prices=diff(log(security_prices))[-1,]
+  b<-apply(diff(log(p[,1:(ncol(p)-2)]))[-1,], 2, # Beta
+           function(col) ((lm((col)~diff(log(p[,spx]))[-1,]))$coefficients[2]))
   
-  # Calculate logs of S&P 500
-  spx_column=diff(log(spx_column))[-1,]
+  treynor <- NULL # Calculate Treynor values
   
-  # Calculate beta
-  beta_treynor <- apply(security_prices,2,function(col) ((lm((col) ~
-                                  spx_column))$coefficients[2]))
+  for (k in 1:(ncol(p)-2)){ treynor<-rbind(treynor,((e.r[k]-rf)/b[k])*252^.5)}
   
-  # Define new list name to contain Treynor values
-  df_treynor <- NULL
+  rownames(treynor) <- tickers # Add tickers
+  colnames(treynor) <- "Treynor" # Put name of ratio to column
   
-  # Calculate Treynor ratio
-  for (k in 1:ncol(security_prices)){ 
-    df_treynor <- rbind(df_treynor,((mean_calculated[k]- treasuries) /
-                                      beta_treynor[k])* 252^0.5) }
-  # Add tickers
-  rownames(df_treynor) <- tickers
-  
-  # Put name of ratio to column
-  colnames(df_treynor) <- "Treynor"
-  
-  # Display values
-  return(df_treynor)
+  return(treynor) # Display values
 }
 # Test
-tickers <- c("STLA", "UNM", "NVDA", "AAPL", "CVNA")
-treynor_ratio(tickers, start_date = "2022-09-01")
+treynor.ratio(c("STLA", "UNM", "NVDA", "AAPL", "CVNA"), s = "2022-09-01")
