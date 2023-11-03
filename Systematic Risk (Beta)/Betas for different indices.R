@@ -1,68 +1,39 @@
+lapply(c("quantmod", "timeSeries"), require, character.only = T) # Libraries 
+
 # Betas with different indices
-df_with_betas <- function(y, bnchm = c("^GSPC"), period = 1){
+beta.indices <- function(y, benchmark = c("^GSPC"), period = 1){
   
-  # Create an empty variables for beta values
-  beta_list <- NULL
+  beta.df <- NULL # Create an empty variables for beta values
   
-  # For each benchmark
-  for (m in 1:length(bnchm)){
+  for (m in 1:length(benchmark)){ b <- benchmark[m] # Set up variable
     
-    # Set up variable 
-    bnchm_for_loop <- bnchm[m]
+    l.beta <- c(y, b) # Add benchmark to list
     
-    # Add benchmark to list
-    list_y <- c(y, bnchm_for_loop)
+    p <- NULL # Create an empty variables for security values
     
-    # Create an empty variables for security values
-    portfolioPrices <- NULL
-    
-    # Loop for data extraction
-    for (Ticker in list_y){
+    for (Ticker in l.beta){ # Data upload
       
-      # When neither start date nor end date are defined
-      portfolioPrices <- cbind(portfolioPrices,
-                               getSymbols(Ticker,
-                                          from = as.Date(Sys.Date()) - 365 *
-                                            period,
-                                          to = Sys.Date(),
-                                          src = "yahoo",
-                                          auto.assign=FALSE)[,4]) } 
-    # Get rid of NAs
-    portfolioPrices <- portfolioPrices[apply(portfolioPrices,1,
-                                             function(x) all(!is.na(x))),]
-    # Put the tickers in data set
-    colnames(portfolioPrices) <- list_y
+      p <- cbind(p, getSymbols(Ticker,from = as.Date(Sys.Date()) - 365*period,
+                               to=Sys.Date(),src="yahoo",auto.assign=F)[,4]) } 
     
-    # Make data discrete
-    portfolioReturns <- ROC(portfolioPrices, type = "discrete")
+    p <- p[apply(p, 1, function(x) all(!is.na(x))),] # Get rid of NA
     
-    # Make it time series
-    portfolioReturns <-as.timeSeries(portfolioPrices)
+    colnames(p) <- l.beta # Put the tickers in data set
     
-    # Calculate Returns and get rid of NA
-    x=diff(log(portfolioReturns))[-1,]
+    p=diff(log(as.timeSeries(p)))[-1,] # Time Series Returns and get rid of NA
     
-    # Copy column index column and make separate column
-    spx <- x[,bnchm_for_loop]
+    beta <- apply(p[, -which(names(p) == b)],2, # Calculate Betas
+                  function(col) ((lm((col) ~ p[,b]))$coefficients[2]))
     
-    # Subset index from data set
-    stock_returns <- x[, -which(names(x) == bnchm_for_loop)]
-    
-    # Calculate Betas
-    beta <- apply(stock_returns,2,function(col) ((lm((col) ~
-                                                       spx))$coefficients[2]))
-    # Contain one year Beta column
-    if (is.null(beta_list)){ beta_list <- as.data.frame(beta) } else {
+    # Put data into data frame
+    if (is.null(beta.df)){ beta.df <- as.data.frame(beta) } else {
       
-      # Add five year Beta column
-      beta_list <- cbind(beta_list, as.data.frame(beta)) } }
+      beta.df <- cbind(beta.df, as.data.frame(beta)) } }
   
-  # Give column names
-  colnames(beta_list) <- c(sprintf("Beta %s", bnchm))
+  colnames(beta.df) <- c(sprintf("Beta %s", benchmark)) # Give column names
   
-  # Display values
-  return(beta_list)
+  return(beta.df) # Display values
 }
 # Test
-df_with_betas(tickers_for_test, bnchm = c("^GSPC", "^IXIC", "^DJI", "^FTSE"),
-              period = 1)
+beta.indices(tickers_for_test,benchmark = c("^GSPC", "^IXIC", "^DJI", "^FTSE"),
+             period = 1)
