@@ -1,17 +1,25 @@
 beta.yahoo <- function(x){ # Function to get info about company beta
   
-  p <- sprintf("https://finance.yahoo.com/quote/%s/key-statistics?p=%s", x, x)
+  b.values <- NULL # Create list to contain values
   
-  page.p <- read_html(p) # Read HTML & extract necessary info
+  for (n in 1:length(x)){ v <- x[n] # For every ticker get beta value
   
-  price.yahoo1 <- page.p %>% html_nodes('div') %>% .[[1]] -> tab11
+    p <- sprintf("https://finance.yahoo.com/quote/%s/key-statistics?p=%s",v,v)
+    
+    page.p <- read_html(p) # Read HTML & extract necessary info
+    
+    price.yahoo1 <- page.p %>% html_nodes('div') %>% .[[1]] -> tab
+    
+    i <- tab %>% html_nodes('tr') %>% html_nodes('td') %>% html_text()
+    
+    b <- data.frame(i[grep("Beta ", i) + 1]) # Scrape Beta value
+    
+    rownames(b) <- v # Assign row names
+    
+    colnames(b) <- "Beta 5Y" # Assign column names
+    
+    b.values <- rbind.data.frame(b.values, b)} # Join betas
   
-  yahoo.header1 <- tab11 %>% html_nodes('tr')%>%html_nodes('td')%>%html_text()
-  
-  b <- yahoo.header1[grep("Beta ", yahoo.header1) + 1] # Scrape Beta value
-  
-  names(b) <- sprintf("Beta %s", x) # Assign name for beta with ticker
-  
-  b # Display
+  b.values # Display
 }
-beta.yahoo("M") # Test
+beta.yahoo(x = c("M", "X", "C", "AAPL")) # Test
