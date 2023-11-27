@@ -1,10 +1,10 @@
 lapply(c("quantmod", "timeSeries"), require, character.only = T) # Libraries
 
 # Treynor script
-treynor.ratio <- function(x, tr10 = "^TNX", spx = "^GSPC",
+treynor.ratio <- function(x, tr = "^TNX", spx = "^GSPC",
                           s = as.Date(Sys.Date())-365, e=as.Date(Sys.Date())){
   
-  y <- c(x, tr10, spx) # Add 10 year Treasuries to list
+  y <- c(x, tr, spx) # Add 10 year Treasuries to list
   
   p <- NULL # Create a list for securities data
   
@@ -17,7 +17,7 @@ treynor.ratio <- function(x, tr10 = "^TNX", spx = "^GSPC",
   
   p <- as.timeSeries(p) # Make it time series
   
-  rf <- apply(p[,tr10], 2, function(col) mean(col) / 100) # Risk Free Return
+  rf <- apply(p[,tr], 2, function(col) mean(col) / 100) # Risk Free Return
   
   # Expected Return
   r <- apply(diff(log(p[,1:length(x)]))[-1,],2,function(col) (exp(sum(col))-1))
