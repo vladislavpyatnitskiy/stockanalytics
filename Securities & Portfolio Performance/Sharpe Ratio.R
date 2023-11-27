@@ -15,20 +15,20 @@ sharpe.ratio <- function(y, tr = "^TNX", s = as.Date(Sys.Date())-365,
   
   colnames(p) <- y # Put the tickers in data set
   
-  r <- as.timeSeries(p) # Make it time series
+  p <- as.timeSeries(p) # Make it time series
   
-  rf <- apply(r[,tr], 2, function(col) mean(col)) # Risk Free
+  rf <- apply(p[,tr], 2, function(col) mean(col)) # Risk Free
   
   # Matrix of financial instruments & Turn to logs & Calculate Mean and SD
-  v<-apply(diff(log(r[,-which(names(r)==tr)]))[-1,],2,
+  r<-apply(diff(log(p[,-which(names(p)==tr)]))[-1,],2,
            function(col) c((exp(sum(col)) - 1) * 100, sd(col) * 1000))
   
   sharpe <- NULL # List for Sharpe values
   
   # Calculate Sharpe ratio & Put values into list
-  for (k in 1:ncol(v)){ sharpe <- rbind(sharpe, (v[1,k] - rf) / v[2,k]) }
+  for (k in 1:ncol(r)){ sharpe <- rbind(sharpe, (r[1,k] - rf) / r[2,k]) }
   
-  rownames(sharpe) <- colnames(v) # Add tickers
+  rownames(sharpe) <- colnames(r) # Add tickers
   colnames(sharpe) <- "Sharpe" # Put name of ratio to column
   
   return(sharpe) # Display values
