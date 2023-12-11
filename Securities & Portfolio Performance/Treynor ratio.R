@@ -1,10 +1,10 @@
 lapply(c("quantmod", "timeSeries"), require, character.only = T) # Libraries
 
 # Treynor script
-treynor.ratio <- function(x, tr = "^TNX", spx = "^GSPC",
+treynor.ratio <- function(x, tr = "^TNX", i = "^GSPC",
                           s = as.Date(Sys.Date())-365, e=as.Date(Sys.Date())){
   
-  y <- c(x, tr, spx) # Add 10 year Treasuries to list
+  y <- c(x, tr, i) # Add 10 year Treasuries to list
   
   p <- NULL # Create a list for securities data
   
@@ -19,17 +19,16 @@ treynor.ratio <- function(x, tr = "^TNX", spx = "^GSPC",
   
   rf <- apply(p[,tr], 2, function(col) mean(col) / 100) # Risk Free Return
   
-  # Expected Return
-  r <- apply(diff(log(p[,1:length(x)]))[-1,],2,function(col) (exp(sum(col))-1))
-  
-  b<-apply(diff(log(p[,1:length(x)]))[-1,], 2, # Beta
-           function(col) ((lm((col)~diff(log(p[,spx]))[-1,]))$coefficients[2]))
+  # Calcualate expected return for first row and beta on the second one
+  r<-apply(diff(log(p[,1:length(x)]))[-1,], 2,
+           function(col) c(exp(sum(col)) - 1,
+                           (lm((col)~diff(log(p[,i]))[-1,]))$coefficients[2]))
   
   treynor <- NULL # Calculate Treynor values
-              
-  for (k in 1:length(x)){ treynor <- rbind(treynor, (r[k] - rf) / b[k]) }
   
-  rownames(treynor) <- names(r) # Add tickers
+  for (k in 1:length(x)){ treynor <- rbind(treynor, (r[1,k] - rf) / r[2,k]) }
+  
+  rownames(treynor) <- names(r[2,]) # Add tickers
   colnames(treynor) <- "Treynor" # Put name of ratio to column
   
   return(treynor) # Display values
