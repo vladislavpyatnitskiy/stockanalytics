@@ -1,10 +1,10 @@
 lapply(c("quantmod", "timeSeries"), require, character.only = T) # Libraries
 
 # Function to calculate Sortino Ratio
-sortino.ratio <- function(y,tr10 = "^TNX",s = as.Date(Sys.Date())-365,
+sortino.ratio <- function(y,tr = "^TNX",s = as.Date(Sys.Date())-365,
                           e = as.Date(Sys.Date()),v.sortino = NULL){
   
-  y <- c(y, tr10) # Add 10 year Treasuries to list
+  y <- c(y, tr) # Add 10 year Treasuries to list
   
   p <- NULL # Create list with securities data
   
@@ -17,26 +17,22 @@ sortino.ratio <- function(y,tr10 = "^TNX",s = as.Date(Sys.Date())-365,
   
   p <- diff(log(as.timeSeries(p)))[-1,] # Clean data for returns
   
-  rf <- apply(p[,tr10], 2, function(col) mean(col)) # Risk Free Rate
+  rf <- apply(p[,tr], 2, function(col) mean(col)) # Risk Free Rate
   
-  r <- p[, -which(names(p) == tr10)] # Matrix with financial instruments
+  r <- p[, -which(names(p) == tr)] # Matrix with financial instruments
   
   r.mean <- apply(r, 2, function(col) mean(col)) # Calculate return
   
-  Sortino <- NULL # List for calculated below Sortino values 
+  S <- NULL # List for calculated below Sortino values 
   
-  for (k in 1:ncol(r)){ excess.r <- r[,k] - r.mean[k]
+  for (k in 1:ncol(r)){ excess.r <- r[,k] - r.mean[k] # Excess Return
   
-    e.r <- mean(excess.r) # Average Excess Return
-    
-    downside.risk <- mean((excess.r[excess.r < 0]) ^ 2) ^ .5 # Downside Risk
-    
-    Sortino <- rbind(Sortino, (e.r - rf) / downside.risk) } # Sortino Ratio
-    
-  rownames(Sortino) <- colnames(r) # Add tickers
-  colnames(Sortino) <- "Sortino" # Put name of ratio to column
+    S <- rbind(S, (mean(excess.r)-rf) / mean((excess.r[excess.r < 0])^2)^.5) } 
   
-  return(Sortino) # Display values
+  rownames(S) <- colnames(r) # Add tickers
+  colnames(S) <- "Sortino" # Put name of ratio to column
+  
+  return(S) # Display values
 }
 # Test
 sortino.ratio(c("STLA", "UNM", "NVDA", "AAPL", "CVNA"), s = "2022-09-01")
