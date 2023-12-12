@@ -1,9 +1,9 @@
 lapply(c("quantmod","timeSeries"),require,character.only=T) # Libraries
 
-perform.ratio <- function(x, tr = "^TNX", spx = "^GSPC",
+perform.ratio <- function(x, tr = "^TNX", i = "^GSPC",
                           s = as.Date(Sys.Date())-365, e=as.Date(Sys.Date())){
   
-  y <- c(x, tr, spx) # Add 10 year Treasuries to list
+  y <- c(x, tr, i) # Add 10 year Treasuries to list
   
   p <- NULL # Create an empty variable
   
@@ -18,32 +18,28 @@ perform.ratio <- function(x, tr = "^TNX", spx = "^GSPC",
   
   rf <- apply(p[,tr], 2, function(col) mean(col)) # Risk Free
   
-  # Matrix of financial instruments & Turn to logs & Calculate Mean and SD
+  # Matrix with Expected Return, Standard Deviation, Mean & Beta
   r<-apply(diff(log(p[,1:length(x)]))[-1,],2,
-           function(col) c((exp(sum(col)) - 1) * 100, sd(col) * 1000))
-  
-  b<-apply(diff(log(p[,1:length(x)]))[-1,], 2, # Beta
-           function(col) ((lm((col)~diff(log(p[,spx]))[-1,]))$coefficients[2]))
-  
-  r.mean <- apply(r, 2, function(col) mean(col)) # Calculate return
+           function(col) c((exp(sum(col)) - 1) * 100, sd(col)*1000, mean(col),
+                           (lm((col)~diff(log(p[,i]))[-1,]))$coefficients[2]))
   
   perf.df <- NULL # List for Sharpe, Treynor & Sortino values
-
-  for (k in 1:length(x)){ sharpe <- (r[1,k] - rf) / r[2,k] # Sharpe
   
-    treynor <- (r[1,k] - rf) / b[k] / 100 # Treynor
+  for (k in 1:length(x)){ Sh <- (r[1,k] - rf) / r[2,k] # Sharpe
   
-    excess.r <- r[,k] - r.mean[k] # Sortino
-  
-    Sortino <- (mean(excess.r) - rf) / mean((excess.r[excess.r < 0]) ^ 2) ^ .5
+    Tr <- (r[1,k] - rf) / r[4,k] / 100 # Treynor
     
-    perf.v <- cbind.data.frame(sharpe, treynor, Sortino) # All measures
+    ER <- diff(log(p[,k]))[-1,] - r[3,k] # Excess Return & Sortino
+    
+    So <- (mean(ER) - mean(diff(log(p[,tr]))[-1,]))/mean((ER[ER < 0]) ^ 2) ^ .5
+    
+    perf.v <- cbind.data.frame(Sh, Tr, So) # All measures
     
     rownames(perf.v) <- x[k] # Ticker
     
     perf.df <- rbind.data.frame(perf.df, perf.v) } # Join all 
-  
-  colnames(perf.df) <- c("Sharpe", "Treynor", "Sortino") 
+    
+  colnames(perf.df) <- c("Sharpe", "Treynor", "Sortino") # colnames
   
   return(perf.df) # Display values
 }
