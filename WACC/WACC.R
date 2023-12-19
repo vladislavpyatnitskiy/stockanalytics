@@ -1,3 +1,6 @@
+# Libraries
+lapply(c("quantmod","timeSeries","rvest"),require,character.only=T)
+
 WACC <- function(x, tr = "^TNX", i = "^GSPC"){ # Weighted AVG Cost of Capital
   
   bs <- sprintf("https://finance.yahoo.com/quote/%s/balance-sheet?p=%s", x, x)
