@@ -92,8 +92,8 @@ WACC <- function(x,  tr = "^TNX", i = "^GSPC", N = 10){ # WACC
     wacc <- rbind(wacc, costofdebt + as.numeric(capital.part * ER)) } # Display
   
   rownames(wacc) <- x # Row names
-  colnames(wacc) <- "WACC" # Column names
+  colnames(wacc) <- "WACC (%)" # Column names
   
-  wacc # Return
+  round(wacc * 100, 2) # Return
 }
-WACC(c("AAPL", "MSFT"), i = "^IXIC") # Test
+WACC(c("MU", "NVDA"), i = "^GSPC") # Test
