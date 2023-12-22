@@ -50,8 +50,8 @@ ROIC <- function(x){ # Return on Invested Capital
     roic <- rbind(roic, (1 - tp / ni) * oi / as.numeric(h)) } # Add values
   
   rownames(roic) <- x # Ticker names
-  colnames(roic) <- "ROIC" # Column Name
+  colnames(roic) <- "ROIC (%)" # Column Name
   
-  roic # Display
+  round(roic * 100, 2) # Display
 }
 ROIC(c("AAPL", "MSFT", "AMZN", "GOOGL", "META", "NVDA")) # Test
