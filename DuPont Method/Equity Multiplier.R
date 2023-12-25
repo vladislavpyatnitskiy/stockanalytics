@@ -24,9 +24,7 @@ Equity.multiplier <- function(x){ # Equity Multiplier
       
       o <- NULL
       
-      if (length(q) > 1){  o <- c(o, q[1]) 
-      
-        } else if (length(q) == 1) { o <- q } } 
+      if (length(q) > 1){  o<-c(o,q[1])} else if (length(q) == 1) { o<-q } } 
       
       c <- rbind(c, o) }
     
