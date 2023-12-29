@@ -1,42 +1,45 @@
-# Descriptive Statistics
-stat_for_assets <- function(x, lg = F){
-  
-  # Calculate logs and remove NA if needed
-  if (isTRUE(lg)){ x = diff(log(x))[-1,] }
-    
-    # Calculate necessary statistics
-    nec_stats <- t(apply(x, 2, function(x) c(min(x),
-                                       quantile(x, na.rm = T, probs = c(0.1)),
-                                       quantile(x, na.rm = T, probs = c(0.25)),
-                                       median(x), # 50 %
-                                       quantile(x, na.rm = T, probs = c(0.75)),
-                                       quantile(x, na.rm = T, probs = c(0.9)),
-                                       max(x),
-                                       mean(x),
-                                       var(x),
-                                       sd(x),
-                                       skewness(x),
-                                       kurtosis(x)
-                                       )
-    )
-    )
-    
-    # Create column names for matrix
-    colnames(nec_stats) <- c("Min",
-                          "10%",
-                          "25%",
-                          "Median 50%",
-                          "75%",
-                          "90%",
-                          "Max",
-                          "Mean",
-                          "Variance",
-                          "SD",
-                          "Skewness",
-                          "Kurtosis")
-    # Return output
-    return(nec_stats)
-}
+lapply(c("quantmod","timeSeries","fBasics"),require,character.only=T) # Libs
 
-# Test
-stat_for_assets(x = stock_data, lg = T)
+fin.stats <- function(x, lg = F, data = F, transpose = F, s = NULL, e = NULL){ 
+  
+  p <- NULL
+  
+  if (isTRUE(data)){ for (A in x){ if (is.null(s) && is.null(e)){
+    
+      # When neither start date nor end date are defined
+      p <- cbind(p, getSymbols(A, src = "yahoo", auto.assign=F)[,4])
+      
+    } else if (is.null(e)) { # When only start date is defined
+      
+      p <- cbind(p,getSymbols(A, from = s, src = "yahoo", auto.assign = F)[,4])
+      
+    } else if (is.null(s)) { 
+      
+      p <- cbind(p,getSymbols(A,to=e,src="yahoo",auto.assign=F)[,4]) } else { 
+        
+        p<-cbind(p,getSymbols(A,from=s,to=e,src="yahoo",auto.assign=F)[,4])} }
+    
+    p <- p[apply(p, 1, function(x) all(!is.na(x))),] # Get rid of NA
+    
+    colnames(p) <- x # Put the tickers in data set
+    
+    x <- as.timeSeries(p) } # Make it time series
+    
+  if (isTRUE(lg)){ x = diff(log(x))[-1,] } # logs & remove NA if needed
+  
+  # Calculate necessary statistics
+  d <- t(apply(x, 2, function(x) c(min(x), quantile(x,na.rm=T,probs = c(.1)),
+                                   quantile(x, na.rm=T,probs=c(.25)),
+                                   median(x), quantile(x,na.rm=T,probs=c(.75)),
+                                   quantile(x,na.rm=T, probs = c(.9)), max(x),
+                                   mean(x), var(x), sd(x), skewness(x),
+                                   kurtosis(x))))
+  
+  # Create column names for matrix
+  colnames(d) <- c("Min","10%","25%","Median 50%","75%", "90%", "Max",
+                   "Mean", "Variance", "SD", "Skewness", "Kurtosis")
+  
+  if (isTRUE(transpose)){ t(d) } else { d } # Display
+}
+fin.stats(x = c("AMZN", "AAPL", "META", "GOOGL", "MSFT", "META", "NVDA",
+                "TSLA"), lg = T, data = T, transpose = T, s = "2023-01-01")
