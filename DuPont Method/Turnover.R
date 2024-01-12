@@ -1,3 +1,5 @@
+library("rvest") # Library
+
 Turnover <- function(x){ # Total Revenue / Total Assets
   
   trnvr <- NULL # List for Turnover values
@@ -16,27 +18,12 @@ Turnover <- function(x){ # Total Revenue / Total Assets
     y <- tab.bs %>% html_nodes('div') %>% html_nodes('span') %>% html_text()
     u <- tab.is %>% html_nodes('div') %>% html_nodes('span') %>% html_text()
     
-    c <- NULL
-    h <- NULL
-    
-    p <- c("Total Assets")
-    r <- c("Total Revenue")
-    
-    for (m in 1:length(r)){ q <- NULL
-    
-      for (n in seq(1)){ q <- cbind(q, u[grep(r[m], u) + n])
-      
-      o <- NULL
-      
-      if (length(q) > 1){  o <- c(o,q[1]) } else if (length(q) == 1) { o<-q } } 
-      
-      c <- rbind(c, o) }
-    
-    c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)) # Reduce commas
-    h <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", y[grep(p, y) + 1])) 
+    # Take values 
+    c<-gsub(",","",gsub("([a-zA-Z]),","\\1 ",u[grep("Total Revenue",u)+1][1])) 
+    h <- gsub(",","",gsub("([a-zA-Z]),","\\1 ",y[grep("Total Assets",y)+1])) 
     
     trnvr <- rbind(trnvr, as.numeric(c) / as.numeric(h)) } # Revenue / Assets
-  
+    
   rownames(trnvr) <- x # Ticker names
   colnames(trnvr) <- "Turnover (%)" # Column Name
   
