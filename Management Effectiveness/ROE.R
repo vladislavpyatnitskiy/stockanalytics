@@ -1,3 +1,5 @@
+library("rvest") # Library
+
 ROE <- function(x){ # Return on Equity
   
   roe <- NULL # List for ROE values
@@ -16,25 +18,13 @@ ROE <- function(x){ # Return on Equity
     y <- tab.bs %>% html_nodes('div') %>% html_nodes('span') %>% html_text()
     u <- tab.is %>% html_nodes('div') %>% html_nodes('span') %>% html_text()
     
-    c <- NULL
-    h <- NULL
+    # Take values for Net Income and Equity
+    c <- gsub(",","",gsub("([a-zA-Z]),","\\1 ",
+                          u[grep("Net Income Common Stockholders",u)+1][1]))
     
-    p <- c("Total Equity Gross Minority Interest")
-    
-    r <- c("Net Income Common Stockholders")
-    
-    for (m in 1:length(r)){ q <- NULL
-    
-      for (n in seq(1)){ q <- cbind(q, u[grep(r[m], u) + n])
-      
-      o <- NULL
-      
-      if (length(q) > 1){  o <- c(o,q[1]) } else if (length(q) == 1) { o<-q } } 
-      
-    c <- rbind(c, o) }
-    
-    c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)) # Reduce commas
-    h <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", y[grep(p, y) + 1])) 
+    h <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ",
+                            y[grep("Total Equity Gross Minority Interest",
+                                   y) + 1])) 
     
     roe <- rbind(roe, as.numeric(c) / as.numeric(h)) } # Net Income / Equity
     
