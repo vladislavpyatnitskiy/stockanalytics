@@ -3,12 +3,10 @@ lapply(c("quantmod", "timeSeries"), require, character.only = T) # Libraries
 # Betas with different indices
 beta.indices <- function(y, benchmark = c("^GSPC"), period = 1){
   
-  beta.df <- NULL # Create an empty variables for beta values
+  df <- NULL # Select data for Beta
   
-  for (m in 1:length(benchmark)){ b <- benchmark[m] # Set up variable
-    
-    l.beta <- c(y, b) # Add benchmark to list
-    
+  for (m in 1:length(benchmark)){ l.beta <- c(y, benchmark[m])
+  
     p <- NULL # Create an empty variables for security values
     
     for (Ticker in l.beta){ # Data upload
@@ -22,17 +20,16 @@ beta.indices <- function(y, benchmark = c("^GSPC"), period = 1){
     
     p=diff(log(as.timeSeries(p)))[-1,] # Time Series Returns and get rid of NA
     
-    beta <- apply(p[, -which(names(p) == b)],2, # Calculate Betas
-                  function(col) ((lm((col) ~ p[,b]))$coefficients[2]))
+    b <- apply(p[, -which(names(p) == benchmark[m])],2, # Calculate Betas
+               function(col) ((lm((col) ~ p[,benchmark[m]]))$coefficients[2]))
     
-    # Put data into data frame
-    if (is.null(beta.df)){ beta.df <- as.data.frame(beta) } else {
+    if (is.null(df)){ df <- as.data.frame(b) } else {
       
-      beta.df <- cbind(beta.df, as.data.frame(beta)) } }
+      df <- cbind(df, as.data.frame(b)) } } # Join data
+    
+  colnames(df) <- c(sprintf("Beta %s", benchmark)) # Give column names
   
-  colnames(beta.df) <- c(sprintf("Beta %s", benchmark)) # Give column names
-  
-  return(beta.df) # Display values
+  return(df) # Display values
 }
 # Test
 beta.indices(tickers_for_test,benchmark = c("^GSPC", "^IXIC", "^DJI", "^FTSE"),
