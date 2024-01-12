@@ -5,7 +5,7 @@ Debt.EBITDA <- function(x){ # Debt to EBITDA
   db <- NULL # List for Debt to EBITDA values
   
   for (q in 1:length(x)){ a <- x[q] # Each ticker in vector
-  
+    
     bs <- sprintf("https://finance.yahoo.com/quote/%s/balance-sheet?p=%s",a,a)
     is <- sprintf("https://finance.yahoo.com/quote/%s/financials?p=%s", a, a)
     
@@ -18,33 +18,11 @@ Debt.EBITDA <- function(x){ # Debt to EBITDA
     y <- tab.bs %>% html_nodes('div') %>% html_nodes('span') %>% html_text()
     u <- tab.is %>% html_nodes('div') %>% html_nodes('span') %>% html_text()
     
-    c <- NULL
-    h <- NULL
+    # Find values of Debt and EBITDA  
+    c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", u[grep("EBITDA", u)+1][1])) 
+    h <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", y[grep("Total Debt",y)+1])) 
     
-    p <- c("Total Debt")
-    r <- c("EBITDA")
-    
-    for (m in 1:length(r)){ q <- NULL
-    
-      for (n in seq(1)){ q <- cbind(q, u[grep(r[m], u) + n])
-      
-      o <- NULL
-      
-      if (length(q) > 1){  o <- c(o, q[1]) 
-      
-        } else if (length(q) == 1) { o <- q } } 
-      
-      c <- rbind(c, o) }
-    
-    c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)) # Reduce commas
-    h <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", y[grep(p, y) + 1])) 
-    
-    rownames(c) <- r # Give dates
-    
-    EBITDA <- as.numeric(c) # EBITDA
-    DEBT <- as.numeric(h) # DEBT
-    
-    db <- rbind(db, DEBT /EBITDA) } # Add values
+    db <- rbind(db, as.numeric(h) / as.numeric(c)) } # Add values
     
   rownames(db) <- x # Ticker names
   colnames(db) <- "DEBT/EBITDA" # Column Name
