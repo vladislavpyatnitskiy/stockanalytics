@@ -1,4 +1,4 @@
-library("rvest") # Library
+lapply(c("quantmod","timeSeries","rvest"),require,character.only=T) # Libraries 
 
 beta.yahoo <- function(x){ # Function to get info about company beta
   
