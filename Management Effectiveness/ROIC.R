@@ -5,7 +5,7 @@ ROIC <- function(x){ # Return on Invested Capital
   roic <- NULL # List for ROIC values
   
   for (q in 1:length(x)){ a <- x[q] # Each ticker in vector
-  
+    
     bs <- sprintf("https://finance.yahoo.com/quote/%s/balance-sheet?p=%s",a,a)
     is <- sprintf("https://finance.yahoo.com/quote/%s/financials?p=%s", a, a)
     
@@ -22,14 +22,8 @@ ROIC <- function(x){ # Return on Invested Capital
     
     r <- c("Operating Income","Tax Provision","Net Income Common Stockholders")
     
-    for (m in 1:length(r)){ q <- u[grep(r[m], u) + 1]
-      
-      o <- NULL
-      
-      if (length(q) > 1){  o <- c(o,q[1]) } else if (length(q) == 1) { o <- q }  
-      
-      c <- rbind(c, o) }
-      
+    for (m in 1:length(r)){ c <- rbind(c, u[grep(r[m], u) + 1][1]) }
+    
     c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)) # Reduce commas
     h<-gsub(",","",gsub("([a-zA-Z]),","\\1 ",y[grep("Invested Capital",y)+1])) 
     
