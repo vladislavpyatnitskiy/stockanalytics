@@ -13,20 +13,12 @@ Equity.multiplier <- function(x){ # Equity Multiplier
     price.yahoo1 <- page.bs %>% html_nodes('div') %>% .[[1]] -> tab.bs
     
     y <- tab.bs %>% html_nodes('div') %>% html_nodes('span') %>% html_text()
-  
+    
     p <- c("Total Assets", "Total Equity Gross Minority Interest")
     
     c <- NULL  
     
-    for (m in 1:length(p)){ q <- NULL
-    
-      for (n in seq(1)){ q <- cbind(q, y[grep(p[m], y) + n])
-      
-      o <- NULL
-      
-      if (length(q) > 1){  o<-c(o,q[1])} else if (length(q) == 1) { o<-q } } 
-      
-      c <- rbind(c, o) }
+    for (m in 1:length(p)){ c <- rbind(c, y[grep(p[m], y) + 1][1]) }
     
     c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)) 
     
