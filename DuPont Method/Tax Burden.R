@@ -18,16 +18,8 @@ Tax.burden <- function(x){ # Tax Burden ratio
     
     c <- NULL  
     
-    for (m in 1:length(p)){ q <- NULL
+    for (m in 1:length(p)){ c <- rbind(c, y[grep(p[m], y) + 1][1]) }
     
-      for (n in seq(1)){ q <- cbind(q, y[grep(p[m], y) + n])
-      
-      o <- NULL
-      
-      if (length(q) > 1){  o<-c(o, q[1]) } else if (length(q) == 1) { o<-q } } 
-      
-      c <- rbind(c, o) }
-      
     c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)) 
     
     tb <- rbind(tb, as.numeric(c[1])/as.numeric(c[2])) } # Net/Pretax Incomes
