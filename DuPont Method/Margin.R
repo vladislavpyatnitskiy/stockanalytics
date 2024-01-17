@@ -1,3 +1,5 @@
+library("rvest") # Library
+
 Margin <- function(x){ # Margin ratio
   
   margin <- NULL # List for Margin values
@@ -16,22 +18,12 @@ Margin <- function(x){ # Margin ratio
     
     c <- NULL  
     
-    for (m in 1:length(p)){ q <- NULL
-    
-      for (n in seq(1)){ q <- cbind(q, y[grep(p[m], y) + n])
-      
-      o <- NULL
-      
-      if (length(q) > 1){  o <- c(o, q[1]) 
-      
-      } else if (length(q) == 1) { o <- q } } 
-      
-      c <- rbind(c, o) }
+    for (m in 1:length(p)){ c <- rbind(c, y[grep(p[m], y) + 1][1]) }
     
     c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)) 
     
     margin<-rbind(margin,as.numeric(c[1])/as.numeric(c[2])) } # EBIT / Revenue
-  
+    
   rownames(margin) <- x # Ticker names
   colnames(margin) <- "Margin (%)" # Column Name
   
