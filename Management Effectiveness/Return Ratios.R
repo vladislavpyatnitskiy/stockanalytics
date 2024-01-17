@@ -1,7 +1,7 @@
 library("rvest") # Library
 
 Return.ratios <- function(x){ ratios <- NULL # List for values
-  
+
   for (q in 1:length(x)){ a <- x[q] # Each ticker in vector
   
     bs <- sprintf("https://finance.yahoo.com/quote/%s/balance-sheet?p=%s",a,a)
@@ -21,30 +21,14 @@ Return.ratios <- function(x){ ratios <- NULL # List for values
     r <- c("Operating Income","Tax Provision","Net Income Common Stockholders",
            "EBIT")
     
-    for (m in 1:length(r)){ q <- NULL
-    
-      for (n in seq(1)){ q <- cbind(q, u[grep(r[m], u) + n])
-      
-      o <- NULL
-      
-      if (length(q) > 1){  o <- c(o,q[1]) } else if (length(q) == 1) { o<-q } } 
-    
-    c <- rbind(c, o) }
+    for (m in 1:length(r)){ c <- rbind(c, u[grep(r[m], u) + 1][1]) }
     
     p <- c("Invested Capital", "Total Assets", 
            "Total Equity Gross Minority Interest")
     
     h <- NULL
     
-    for (m in 1:length(p)){ q <- NULL
-    
-      for (n in seq(1)){ q <- cbind(q, y[grep(p[m], y) + n])
-      
-      o <- NULL
-      
-      if (length(q) > 1){  o <- c(o,q[1]) } else if (length(q) == 1) { o<-q } } 
-      
-      h <- rbind(h, o) }
+    for (m in 1:length(p)){ h <- rbind(h, y[grep(p[m], y) + 1][1]) }
     
     c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)) # Reduce commas
     h <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", h)) # Reduce commas 
