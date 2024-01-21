@@ -1,5 +1,4 @@
-# Libraries
-lapply(c("quantmod","timeSeries","rvest"),require,character.only=T)
+lapply(c("quantmod","timeSeries","rvest"),require,character.only=T) # Libraries
 
 WACC <- function(x,  tr = "^TNX", i = "^GSPC", N = 10){ # WACC
   
@@ -27,30 +26,10 @@ WACC <- function(x,  tr = "^TNX", i = "^GSPC", N = 10){ # WACC
     
     r <- c("Interest Expense","Tax Provision","Net Income Common Stockholders")
     
-    for (m in 1:length(r)){ q <- NULL
+    for (m in 1:length(r)){ c <- rbind(c, u[grep(r[m], u) + 1][1]) }
+    for (m in 1:length(d)){ h <- rbind(h, y[grep(d[m], y) + 1][1]) }
     
-      for (n in seq(1)){ q <- cbind(q, u[grep(r[m], u) + n])
-      
-      o <- NULL
-      
-      if (length(q) > 1){  o <- c(o,q[1]) } else if (length(q) == 1) { o<-q } } 
-      
-      c <- rbind(c, o) }
-      
     c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)) # Income Statement
-    
-    for (m in 1:length(d)){ v <- NULL
-    
-      for (n in seq(1)){ v <- cbind(v, y[grep(d[m], y) + n])
-      
-      w <- NULL
-      
-      if (length(v) > 1){ for (n in seq(0,3,1)) w <- c(w, v[1 + 2*n]) 
-      
-        } else if (length(v) == 1) { w <- v } } 
-      
-      h <- rbind(h, w) }
-      
     h <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", h)) # Balance Sheet
     
     Rd <- as.numeric(c[1]) / as.numeric(h[1]) # Interest Expense / Total Debt
@@ -72,8 +51,8 @@ WACC <- function(x,  tr = "^TNX", i = "^GSPC", N = 10){ # WACC
     p <- NULL # Create a list for securities data
     
     for (A in yi){ p <- cbind(p, getSymbols(A, from = actual.date - 365 * N, 
-                                            to = actual.date,
-                                            src = "yahoo",auto.assign=F)[,4]) }
+                                            to = actual.date, src = "yahoo",
+                                            auto.assign=F)[,4]) }
     
     p <- p[apply(p, 1, function(x) all(!is.na(x))),] # Get rid of NA
     
@@ -87,10 +66,10 @@ WACC <- function(x,  tr = "^TNX", i = "^GSPC", N = 10){ # WACC
     b <- apply(diff(log(p[,a]))[-1,], 2,
                function(col) (lm((col)~diff(log(p[,i]))[-1,]))$coefficients[2])
     
-    ER <- rf + b * (exp(sum(diff(log(p[,i]))[-1,])/N) - 1 - rf) # CAPM
+    ER <- rf + b * ((exp(sum(diff(log(p[,i]))[-1,])))^(1 / N) - 1 - rf) # CAPM
     
     wacc <- rbind(wacc, costofdebt + as.numeric(capital.part * ER)) } # Display
-  
+    
   rownames(wacc) <- x # Row names
   colnames(wacc) <- "WACC (%)" # Column names
   
