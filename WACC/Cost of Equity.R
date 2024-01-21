@@ -1,4 +1,6 @@
-cost.of.equity <- function(x,  tr = "^TNX", i = "^GSPC"){ # Cost of Equity
+lapply(c("quantmod","timeSeries","rvest"),require,character.only=T) # Libs
+
+cost.of.equity <- function(x, tr = "^TNX", i = "^GSPC",N=10){ # Cost of Equity
   
   bs <- sprintf("https://finance.yahoo.com/quote/%s/balance-sheet?p=%s", x, x)
   
@@ -13,17 +15,7 @@ cost.of.equity <- function(x,  tr = "^TNX", i = "^GSPC"){ # Cost of Equity
   d <- c("Total Debt", "Total Liabilities Net Minority Interest",
          "Total Equity Gross Minority Interest")
   
-  for (m in 1:length(d)){ v <- NULL
-  
-    for (n in seq(1)){ v <- cbind(v, y[grep(d[m], y) + n])
-    
-    w <- NULL
-    
-    if (length(v) > 1){ for (n in seq(0,3,1)) w <- c(w, v[1 + 2*n]) 
-    
-      } else if (length(v) == 1) { w <- v } } 
-    
-    h <- rbind(h, w) }
+  for (m in 1:length(d)){ h <- rbind(h, y[grep(d[m], y) + 1][1]) }
   
   h <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", h)) # Balance Sheet
   
@@ -35,9 +27,9 @@ cost.of.equity <- function(x,  tr = "^TNX", i = "^GSPC"){ # Cost of Equity
   
   p <- NULL # Create a list for securities data
   
-  for (A in yi){ p <- cbind(p, getSymbols(A, from = actual.date - 365, 
-                                         to = actual.date,
-                                         src = "yahoo", auto.assign=F)[,4]) }
+  for (A in yi){ p <- cbind(p, getSymbols(A, from = actual.date - 365 * N, 
+                                          to = actual.date, src = "yahoo",
+                                          auto.assign=F)[,4]) }
   
   p <- p[apply(p, 1, function(x) all(!is.na(x))),] # Get rid of NA
   
@@ -47,13 +39,11 @@ cost.of.equity <- function(x,  tr = "^TNX", i = "^GSPC"){ # Cost of Equity
   
   rf <- apply(p[,tr], 2, function(col) mean(col) / 100) # Risk Free Return
   
-  rm <- exp(sum(diff(log(p[,i]))[-1,])) # Markter Return
-  
   # Calculate  beta
   b <- apply(diff(log(p[,x]))[-1,], 2,
              function(col) (lm((col) ~ diff(log(p[,i]))[-1,]))$coefficients[2])
   
-  ER <- rf + b * (rm - rf) # CAPM
+  ER <- rf + b * ((exp(sum(diff(log(p[,i]))[-1,]))) ^ (1 / N) - 1 - rf) # CAPM
   
   as.numeric(capital.part * ER) # Display
 }
