@@ -20,9 +20,9 @@ Margin <- function(x){ # Margin ratio
     
     for (m in 1:length(p)){ c <- rbind(c, y[grep(p[m], y) + 1][1]) }
     
-    c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)) 
+    c <- as.numeric(gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)))
     
-    margin<-rbind(margin,as.numeric(c[1])/as.numeric(c[2])) } # EBIT / Revenue
+    margin <- rbind(margin, c[1] / c[2]) } # EBIT / Revenue
     
   rownames(margin) <- x # Ticker names
   colnames(margin) <- "Margin (%)" # Column Name
