@@ -20,9 +20,9 @@ Interest.burden <- function(x){ # Interest Burden ratio
     
     for (m in 1:length(p)){ c <- rbind(c, y[grep(p[m], y) + 1][1]) }
     
-    c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)) 
+    c <- as.numeric(gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)))
     
-    ib <- rbind(ib, as.numeric(c[1])/as.numeric(c[2])) } # Pretax Income/EBIT
+    ib <- rbind(ib, c[1] / c[2]) } # Pretax Income/EBIT
     
   rownames(ib) <- x # Ticker names
   colnames(ib) <- "Interest Burden (%)" # Column Name
