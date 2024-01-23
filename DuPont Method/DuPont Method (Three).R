@@ -5,7 +5,7 @@ DuPont.three <- function(x){ # DuPont Method ratios
   dupont <- NULL # List for DuPont Method values
   
   for (q in 1:length(x)){ a <- x[q] # Each ticker in vector
-    
+  
     bs<-sprintf("https://finance.yahoo.com/quote/%s/balance-sheet?p=%s",a,a)
     is<-sprintf("https://finance.yahoo.com/quote/%s/financials?p=%s", a, a)
     
@@ -27,13 +27,13 @@ DuPont.three <- function(x){ # DuPont Method ratios
     for (m in 1:length(r)){ c <- rbind(c, u[grep(r[m], u) + 1][1]) }
     for (m in 1:length(p)){ h <- rbind(h, y[grep(p[m], y) + 1][1]) }
     
-    c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)) # Reduce commas
-    h <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", h)) # Reduce commas
+    c <- as.numeric(gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)))
+    h <- as.numeric(gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", h)))
     
-    d.ratios <- cbind(as.numeric(c[1]) / as.numeric(h[2]), # Return on Equity
-                      as.numeric(c[1]) / as.numeric(c[2]), # Net Profit Margin
-                      as.numeric(c[2]) / as.numeric(h[1]), # Asset Turnover
-                      as.numeric(h[1]) / as.numeric(h[2])) # Equity Multiplier
+    d.ratios <- cbind(c[1] / h[2], # Return on Equity
+                      c[1] / c[2], # Net Profit Margin
+                      c[2] / h[1], # Asset Turnover
+                      h[1] / h[2]) # Equity Multiplier
     
     dupont <- rbind(dupont, d.ratios) } # DuPont Method
     
@@ -43,4 +43,4 @@ DuPont.three <- function(x){ # DuPont Method ratios
   
   round(dupont * 100, 2) # Display
 }
-DuPont.three(c("AAPL")) # Test
+DuPont.three(c("AAPL", "MSFT")) # Test
