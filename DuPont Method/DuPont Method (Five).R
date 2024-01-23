@@ -26,21 +26,20 @@ DuPont.five <- function(x){ # DuPont Method ratios
            "Total Revenue")
     
     for (m in 1:length(r)){ c <- rbind(c, u[grep(r[m], u) + 1][1]) }
-      
     for (m in 1:length(p)){ h <- rbind(h, y[grep(p[m], y) + 1][1]) }
-      
-    c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)) # Reduce commas
-    h <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", h)) 
     
-    d.ratios <- cbind(as.numeric(c[1]) / as.numeric(h[2]), # Return on Equity
-                      as.numeric(c[1]) / as.numeric(c[2]), # Tax Burden
-                      as.numeric(c[2]) / as.numeric(c[3]), # Interest Burden
-                      as.numeric(c[3]) / as.numeric(c[4]), # Margin
-                      as.numeric(c[4]) / as.numeric(h[1]), # Turnover
-                      as.numeric(h[1]) / as.numeric(h[2])) # Equity Multiplier
+    c <- as.numeric(gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c))) 
+    h <- as.numeric(gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", h)))
+    
+    d.ratios <- cbind(c[1] / h[2], # Return on Equity
+                      c[1] / c[2], # Tax Burden
+                      c[2] / c[3], # Interest Burden
+                      c[3] / c[4], # Margin
+                      c[4] / h[1], # Turnover
+                      h[1] / h[2]) # Equity Multiplier
     
     dupont <- rbind(dupont, d.ratios) } # DuPont Method
-  
+    
   rownames(dupont) <- x # Ticker names
   colnames(dupont) <- c("ROE (%)", "Tax Burden (%)", "Interest Burden (%)",
                         "Margin (%)","Turnover (%)","Equity Multiplier (%)") 
