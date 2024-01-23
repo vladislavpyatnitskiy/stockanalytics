@@ -20,9 +20,9 @@ Tax.burden <- function(x){ # Tax Burden ratio
     
     for (m in 1:length(p)){ c <- rbind(c, y[grep(p[m], y) + 1][1]) }
     
-    c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)) 
+    c <- as.numeric(gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)))
     
-    tb <- rbind(tb, as.numeric(c[1])/as.numeric(c[2])) } # Net/Pretax Incomes
+    tb <- rbind(tb, c[1] / c[2]) } # Net/Pretax Incomes
     
   rownames(tb) <- x # Ticker names
   colnames(tb) <- "Interest Burden (%)" # Column Name
