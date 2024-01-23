@@ -20,9 +20,9 @@ Equity.multiplier <- function(x){ # Equity Multiplier
     
     for (m in 1:length(p)){ c <- rbind(c, y[grep(p[m], y) + 1][1]) }
     
-    c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)) 
+    c <- as.numeric(gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)))
     
-    em <- rbind(em,as.numeric(c[1])/as.numeric(c[2])) } # Total Assets / Equity
+    em <- rbind(em, c[1] / c[2]) } # Total Assets / Equity
     
   rownames(em) <- x # Ticker names
   colnames(em) <- "Equity Multiplier (%)" # Column Name
