@@ -24,15 +24,12 @@ ROIC <- function(x){ # Return on Invested Capital
     
     for (m in 1:length(r)){ c <- rbind(c, u[grep(r[m], u) + 1][1]) }
     
-    c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)) # Reduce commas
-    h<-gsub(",","",gsub("([a-zA-Z]),","\\1 ",y[grep("Invested Capital",y)+1])) 
+    c <- as.numeric(gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)))
+    ic <- as.numeric(gsub(",", "", gsub("([a-zA-Z]),", "\\1 ",
+                                        y[grep("Invested Capital", y) + 1])))
     
-    oi <- as.numeric(c[1]) # Operating Income
-    tp <- as.numeric(c[2]) # Tax Provision
-    ni <- as.numeric(c[3]) # Net Income
-    ic <- as.numeric(h) # Investing Capital
-    
-    roic <- rbind(roic, (1 - tp / ni) * oi / as.numeric(h)) } # Add values
+    # 1 - (Tax Provision - Net Income) * Operating Income / Invested Capital
+    roic <- rbind(roic, (1 - c[2] / c[3]) * c[1] / ic ) } 
     
   rownames(roic) <- x # Ticker names
   colnames(roic) <- "ROIC (%)" # Column Name
