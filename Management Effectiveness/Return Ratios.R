@@ -30,19 +30,12 @@ Return.ratios <- function(x){ ratios <- NULL # List for values
     
     for (m in 1:length(p)){ h <- rbind(h, y[grep(p[m], y) + 1][1]) }
     
-    c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)) # Reduce commas
-    h <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", h)) # Reduce commas 
+    c <- as.numeric(gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)))
+    h <- as.numeric(gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", h)))
     
-    oi <- as.numeric(c[1]) # Operating Income
-    tp <- as.numeric(c[2]) # Tax Provision
-    ni <- as.numeric(c[3]) # Net Income
-    ebit <- as.numeric(c[4]) # EBIT
-    ic <- as.numeric(h[1]) # Investing Capital
-    ta <- as.numeric(h[2]) # Total Assets
-    eq <- as.numeric(h[3]) # Equity
-    
-    # Add values
-    ratios <- rbind(ratios, cbind((1 - tp/ni) * oi/ic, ebit/ta, ni/eq)) }
+    ratios <- rbind(ratios, cbind((1 - c[2] / c[3]) * c[1] / h[1], # ROIC
+                            c[4] / h[2], # EBIT / Total Assets
+                            c[3] / h[3])) } # Net Income / Equity
     
   rownames(ratios) <- x # Ticker names
   colnames(ratios) <- c("ROIC (%)", "ROA (%)", "ROE (%)") # Column Name
