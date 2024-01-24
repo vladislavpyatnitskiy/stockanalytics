@@ -5,7 +5,7 @@ WACC <- function(x,  tr = "^TNX", i = "^GSPC", N = 10){ # WACC
   wacc <- NULL # List for values
   
   for (g in 1:length(x)){ a <- x[g] # Assign variable for each ticker
-  
+    
     bs <- sprintf("https://finance.yahoo.com/quote/%s/balance-sheet?p=%s",a,a)
     is <- sprintf("https://finance.yahoo.com/quote/%s/financials?p=%s",a,a)
     
@@ -29,29 +29,25 @@ WACC <- function(x,  tr = "^TNX", i = "^GSPC", N = 10){ # WACC
     for (m in 1:length(r)){ c <- rbind(c, u[grep(r[m], u) + 1][1]) }
     for (m in 1:length(d)){ h <- rbind(h, y[grep(d[m], y) + 1][1]) }
     
-    c <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", c)) # Income Statement
-    h <- gsub(",", "", gsub("([a-zA-Z]),", "\\1 ", h)) # Balance Sheet
+    c<-as.numeric(gsub(",","",gsub("([a-zA-Z]),","\\1 ",c))) # Income Statement
+    h<-as.numeric(gsub(",","",gsub("([a-zA-Z]),","\\1 ",h))) # Balance Sheet
     
-    Rd <- as.numeric(c[1]) / as.numeric(h[1]) # Interest Expense / Total Debt
+    Rd <- c[1] / h[1] # Interest Expense / Total Debt
+    after.tax.ratio <- 1 - c[2] / c[3] # Tax Provision / Net Income 
+    debt.part <- h[2] / (h[2] + h[3]) # Liabilities / Total Assets
     
-    # Tax Provision / Net Income Common Stockholders
-    after.tax.ratio <- 1 - as.numeric(c[2]) / as.numeric(c[3]) 
+    costofdebt <- debt.part * Rd * after.tax.ratio # Cost of Debt
     
-    # Liabilities / Total Assets
-    debt.part <- as.numeric(h[2]) / (as.numeric(h[2]) + as.numeric(h[3]))
+    capital.part <- h[3] / (h[2] + h[3]) # Equity / Total Assets
     
-    costofdebt <- debt.part * Rd * after.tax.ratio # Display
-    
-    capital.part <- as.numeric(h[3]) / (as.numeric(h[2]) + as.numeric(h[3]))
-    
-    actual.date <-as.Date(as.character(y[grep("Breakdown", y) + 1]),"%m/%d/%Y")
+    today <-as.Date(as.character(y[grep("Breakdown", y) + 1]), "%m/%d/%Y")
     
     yi <- c(a, tr, i) # Add 10 year Treasuries to list
     
     p <- NULL # Create a list for securities data
     
-    for (A in yi){ p <- cbind(p, getSymbols(A, from = actual.date - 365 * N, 
-                                            to = actual.date, src = "yahoo",
+    for (A in yi){ p <- cbind(p, getSymbols(A, from = today - 365 * N, 
+                                            to = today, src = "yahoo",
                                             auto.assign=F)[,4]) }
     
     p <- p[apply(p, 1, function(x) all(!is.na(x))),] # Get rid of NA
@@ -68,7 +64,7 @@ WACC <- function(x,  tr = "^TNX", i = "^GSPC", N = 10){ # WACC
     
     ER <- rf + b * ((exp(sum(diff(log(p[,i]))[-1,])))^(1 / N) - 1 - rf) # CAPM
     
-    wacc <- rbind(wacc, costofdebt + as.numeric(capital.part * ER)) } # Display
+    wacc <- rbind(wacc, costofdebt + capital.part * ER) } # Display
     
   rownames(wacc) <- x # Row names
   colnames(wacc) <- "WACC (%)" # Column names
