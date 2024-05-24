@@ -5,16 +5,16 @@ Equity.multiplier <- function(x){ # Equity Multiplier
   em <- NULL # List for Equity Multiplier values
   
   for (q in 1:length(x)){ a <- x[q] # Each ticker in vector
-  
-    bs <- sprintf("https://finance.yahoo.com/quote/%s/balance-sheet?p=%s",a,a)
+    
+    bs<-sprintf("https://uk.finance.yahoo.com/quote/%s/balance-sheet?p=%s",a,a)
     
     page.bs <- read_html(bs) # Read HTML & extract necessary info
     
-    price.yahoo1 <- page.bs %>% html_nodes('div') %>% .[[1]] -> tab.bs
+    tab.bs <- page.bs %>% html_nodes('div') %>% .[[1]]
     
     y <- tab.bs %>% html_nodes('div') %>% html_nodes('span') %>% html_text()
     
-    p <- c("Total Assets", "Total Equity Gross Minority Interest")
+    p <- c("Total assets", "Total stockholders' equity")
     
     c <- NULL  
     
