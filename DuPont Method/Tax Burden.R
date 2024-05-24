@@ -6,7 +6,7 @@ Tax.burden <- function(x){ # Tax Burden ratio
   
   for (q in 1:length(x)){ a <- x[q] # Each ticker in vector
   
-    is <- sprintf("https://finance.yahoo.com/quote/%s/financials?p=%s", a, a)
+    is <- sprintf("https://uk.finance.yahoo.com/quote/%s/financials?p=%s",a,a)
     
     page.is <- read_html(is) # Read HTML & extract necessary info
     
@@ -14,7 +14,7 @@ Tax.burden <- function(x){ # Tax Burden ratio
     
     y <- tab.is %>% html_nodes('div') %>% html_nodes('span') %>% html_text()
     
-    p <- c("Net Income Common Stockholders", "Pretax Income")
+    p <- c("Net income", "Income before tax")
     
     c <- NULL  
     
