@@ -6,8 +6,8 @@ Turnover <- function(x){ # Total Revenue / Total Assets
   
   for (q in 1:length(x)){ a <- x[q] # Each ticker in vector
   
-    bs <- sprintf("https://finance.yahoo.com/quote/%s/balance-sheet?p=%s",a,a)
-    is <- sprintf("https://finance.yahoo.com/quote/%s/financials?p=%s", a, a)
+    bs<-sprintf("https://uk.finance.yahoo.com/quote/%s/balance-sheet?p=%s",a,a)
+    is<-sprintf("https://uk.finance.yahoo.com/quote/%s/financials?p=%s",a,a)
     
     page.bs <- read_html(bs) # Read HTML & extract necessary info
     page.is <- read_html(is) # Read HTML & extract necessary info
@@ -19,8 +19,8 @@ Turnover <- function(x){ # Total Revenue / Total Assets
     u <- tab.is %>% html_nodes('div') %>% html_nodes('span') %>% html_text()
     
     # Take values 
-    c<-gsub(",","",gsub("([a-zA-Z]),","\\1 ",u[grep("Total Revenue",u)+1][1])) 
-    h <- gsub(",","",gsub("([a-zA-Z]),","\\1 ",y[grep("Total Assets",y)+1])) 
+    c<-gsub(",","",gsub("([a-zA-Z]),","\\1 ",u[grep("Total revenue",u)+1][1])) 
+    h <- gsub(",","",gsub("([a-zA-Z]),","\\1 ",y[grep("Total assets",y)+1])) 
     
     trnvr <- rbind(trnvr, as.numeric(c) / as.numeric(h)) } # Revenue / Assets
     
