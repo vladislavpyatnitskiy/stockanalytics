@@ -1,11 +1,5 @@
-cumulative.returns <- function(x){ # Calculate Cumulative Returns
+cmlrets <- function(x){ # Calculate Cumulative Returns
   
-  x <- diff(log(x)) # Calculate logs
-  
-  x[1,] <- 0 # Substitute "NA" with 0
-  
-  x <- apply(x, 2, function(col) exp(cumsum(col)) - 1) # Cumulative Returns
-  
-  x # Display
+  apply(diff(log(x))[-1,], 2, function(col) exp(cumsum(col)) - 1) 
 }
-cumulative.returns(stock_data) # Test
+cmlrets(stock_data) # Test
