@@ -6,25 +6,26 @@ fin.stats <- function(x, lg = F, data = F, transpose = F, s = NULL, e = NULL){
   
   if (isTRUE(data)){ for (A in x){ if (is.null(s) && is.null(e)){
     
-      # When neither start date nor end date are defined
-      p <- cbind(p, getSymbols(A, src = "yahoo", auto.assign=F)[,4])
+        q <- getSymbols(A, src = "yahoo", auto.assign=F)[,4]
+    
+        } else if (is.null(e)){ # When only start date is defined
+    
+        q <- getSymbols(A, from = s, src = "yahoo", auto.assign = F)[,4]
+    
+        } else if (is.null(s)){ 
+    
+        q <- getSymbols(A, to = e, src = "yahoo", auto.assign = F)[,4] } else { 
       
-    } else if (is.null(e)) { # When only start date is defined
-      
-      p <- cbind(p,getSymbols(A, from = s, src = "yahoo", auto.assign = F)[,4])
-      
-    } else if (is.null(s)) { 
-      
-      p <- cbind(p,getSymbols(A,to=e,src="yahoo",auto.assign=F)[,4]) } else { 
-        
-        p<-cbind(p,getSymbols(A,from=s,to=e,src="yahoo",auto.assign=F)[,4])} }
+        q <- getSymbols(A, from=s, to=e, src="yahoo", auto.assign=F)[,4] } 
+    
+      p <- cbind(p, q) }
     
     p <- p[apply(p, 1, function(x) all(!is.na(x))),] # Get rid of NA
     
     colnames(p) <- x # Put the tickers in data set
     
     x <- as.timeSeries(p) } # Make it time series
-    
+  
   if (isTRUE(lg)){ x = diff(log(x))[-1,] } # logs & remove NA if needed
   
   # Calculate necessary statistics
@@ -34,7 +35,6 @@ fin.stats <- function(x, lg = F, data = F, transpose = F, s = NULL, e = NULL){
                                    quantile(x,na.rm=T, probs = c(.9)), max(x),
                                    mean(x), var(x), sd(x), skewness(x),
                                    kurtosis(x))))
-  
   # Create column names for matrix
   colnames(d) <- c("Min","10%","25%","Median 50%","75%", "90%", "Max",
                    "Mean", "Variance", "SD", "Skewness", "Kurtosis")
