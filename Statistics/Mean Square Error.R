@@ -2,42 +2,34 @@ lapply(c("quantmod", "timeSeries"), require, character.only = T) # libraries
 
 MSE <- function(x, s = NULL, e = NULL, data = T, root = T){ # MSE
   
-  if (isTRUE(data)){ p <- NULL # Create an empty variable
+  if (data){ p <- NULL # Create an empty variable
   
-    # Loop for data extraction & # Set up statements for start and end dates
-    for (A in x){ if (is.null(s) && is.null(e)) {
-      
-      # When neither start date nor end date are defined
-      p <- cbind(p, getSymbols(A, src = "yahoo", auto.assign=F)[,4])
-      
-    } else if (is.null(e)) { # When only start date is defined
-      
-      p <- cbind(p, getSymbols(A, from = s,src="yahoo",auto.assign=F)[,4])
-      
-    } else if (is.null(s)) { # When only end date is defined
-      
-      p <- cbind(p,getSymbols(A, to = e, src = "yahoo", auto.assign = F)[,4])
-      
-    } else { # When both start date and end date are defined
-      
-      p<-cbind(p,getSymbols(A,from=s,to=e,src="yahoo",auto.assign=F)[,4])}
+    src <- "yahoo"
+    
+    getData <- function(A, s, e) {
+      if (is.null(s) && is.null(e)) return(getSymbols(A,src=src,auto.assign=F)) 
+      if (is.null(e)) return(getSymbols(A, from = s, src=src, auto.assign=F)) 
+      if (is.null(s)) return(getSymbols(A, to = e, src=src, auto.assign=F)) 
+      return(getSymbols(A, from = s, to = e, src=src, auto.assign=F)) 
     }
+    for (A in x){ p <- cbind(p, getData(A, s, e)[,4]) } # Join data
+    
     p <- p[apply(p, 1, function(x) all(!is.na(x))),] # Get rid of NA
     
     colnames(p) <- x # Put the tickers in data set
     
     x <- as.timeSeries(p) } # Make it time series
     
-    l <- NULL
+  l <- NULL
+  
+  for (n in 1:ncol(x)){ s <- x[,n]
     
-    for (n in 1:ncol(x)){ s <- x[,n]
+    N <- ifelse(root == T, .5, 1)
     
-      if (isTRUE(root)){ l <- rbind(l, (sum((s-mean(s))^2)/length(s))^.5) }
-    
-      else { l <- rbind(l, (sum((s - mean(s)) ^ 2) / length(s))) } }
+    l <- rbind(l, (sum((s - mean(s)) ^ 2) / length(s)) ^ N) }
   
   rownames(l) <- colnames(x)
-  if (isTRUE(root)){ colnames(l) <- "RMSE" } else { colnames(l) <- "MSE" }
+  colnames(l) <- ifelse(root == T, "RMSE", "MSE")
   
   l # Display
 }
