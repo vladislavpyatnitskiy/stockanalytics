@@ -11,8 +11,17 @@ MSE <- function(x, s = NULL, e = NULL, data = T, root = T){ # MSE
       if (is.null(e)) return(getSymbols(A, from = s, src=src, auto.assign=F)) 
       if (is.null(s)) return(getSymbols(A, to = e, src=src, auto.assign=F)) 
       return(getSymbols(A, from = s, to = e, src=src, auto.assign=F)) 
-    }
-    for (A in x){ p <- cbind(p, getData(A, s, e)[,4]) } # Join data
+  }
+  for (A in x){ p <- cbind(p, getData(A, s, e)[,4]) 
+    
+    message(
+      sprintf(
+        "%s is downloaded (%s / %s)", 
+        A, which(x == A), length(x)
+      )
+    ) # Download message
+    
+    } # Join data
     
     p <- p[apply(p, 1, function(x) all(!is.na(x))),] # Get rid of NA
     
@@ -23,11 +32,11 @@ MSE <- function(x, s = NULL, e = NULL, data = T, root = T){ # MSE
   l <- NULL
   
   for (n in 1:ncol(x)){ s <- x[,n]
-    
+  
     N <- ifelse(root == T, .5, 1)
     
     l <- rbind(l, (sum((s - mean(s)) ^ 2) / length(s)) ^ N) }
-  
+    
   rownames(l) <- colnames(x)
   colnames(l) <- ifelse(root == T, "RMSE", "MSE")
   
