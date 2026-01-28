@@ -14,7 +14,15 @@ c.beta <- function(y, i = "^GSPC", beta=T, s=NULL, e=NULL){ # Beta or Alpha
     if (is.null(s)) return(getSymbols(A, to = e, src=src, auto.assign=F)) 
     return(getSymbols(A, from = s, to = e, src=src, auto.assign=F)) 
   }
-  for (A in y){ p <- cbind(p, getData(A, s, e)[,4]) } # Join data
+  for (A in y){ p <- cbind(p, getData(A, s, e)[,4]) 
+  
+    message(
+      sprintf(
+        "%s is downloaded (%s / %s)", 
+        A, which(y == A), length(y)
+      )
+    )
+  } # Join data
   
   p <- p[apply(p, 1, function(x) all(!is.na(x))),] # Get rid of NA
   
@@ -24,11 +32,15 @@ c.beta <- function(y, i = "^GSPC", beta=T, s=NULL, e=NULL){ # Beta or Alpha
   
   c = ifelse(beta == T, 2, 1)
   
-  B <- as.matrix(apply(x[, -which(names(x) == i)], 2,
-                       function(col) ((lm((col) ~ x[,i]))$coefficients[c])))
+  B <- as.matrix(
+    apply(
+      x[, -which(names(x) == i)], 2,
+      function(col) ((lm((col) ~ x[,i]))$coefficients[c])
+      )
+    )
   
   colnames(B) <- ifelse(beta == T, "Beta", "Alpha")
   
   return(B) # Display values
 }
-c.beta(tickers_for_test, i = "^GSPC", T) # Test
+c.beta(c("UNM", "AIG", "OMF"), i = "^GSPC", T) # Test
