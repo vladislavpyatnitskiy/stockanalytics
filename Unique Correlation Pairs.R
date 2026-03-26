@@ -1,6 +1,6 @@
-pairs_column <- function(x, details = F){ # Unique Correlation values
+pairs_column <- function(x, details = F, method="pearson"){ # Unique Correlation values
   
-  cor_matrix <- cor(x) # Calculate correlation matrix
+  cor_matrix <- cor(x, method=method) # Calculate correlation matrix
   
   # Extract unique pairs and their correlations
   cor_pairs <- which(upper.tri(cor_matrix, diag = TRUE), arr.ind = TRUE)
