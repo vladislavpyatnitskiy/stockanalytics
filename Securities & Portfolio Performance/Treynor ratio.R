@@ -1,15 +1,24 @@
 lapply(c("quantmod", "timeSeries"), require, character.only = T) # Libraries
 
 # Treynor script
-treynor.ratio <- function(x, tr = "^TNX", i = "^GSPC",
-                          s = as.Date(Sys.Date())-365, e=as.Date(Sys.Date())){
+treynor.ratio <- function(x, tr = "^TNX", i = "^GSPC", s = NULL, e=NULL){
   
   y <- c(x, tr, i) # Add 10 year Treasuries to list
   
-  p <- NULL # Create a list for securities data
+  p <- NULL # 4 scenarios: no dates, only start or end dates, both dates
+  src <- "yahoo"
   
-  for (A in y){ p <- cbind(p, getSymbols(A, from = s, to = e,
-                                         src = "yahoo", auto.assign=F)[,4]) }
+  getData <- function(A, s, e) {
+    if (is.null(s) && is.null(e)) return(getSymbols(A, src=src, auto.assign=F)) 
+    if (is.null(e)) return(getSymbols(A, from = s, src=src, auto.assign=F)) 
+    if (is.null(s)) return(getSymbols(A, to = e, src=src, auto.assign=F)) 
+    return(getSymbols(A, from = s, to = e, src=src, auto.assign=F)) 
+  }
+  for (A in y){ p <- cbind(p, getData(A, s, e)[,4]) 
+  
+    message(sprintf("%s is downloaded; %s from %s", A, which(y==A), length(y)))
+  
+  } # Join data
   
   p <- p[apply(p, 1, function(x) all(!is.na(x))),] # Get rid of NA
   
@@ -19,16 +28,20 @@ treynor.ratio <- function(x, tr = "^TNX", i = "^GSPC",
   
   rf <- apply(p[,tr], 2, function(col) mean(col) / 100) # Risk Free Return
   
-  # Calcualate expected return for first row and beta on the second one
-  r<-apply(diff(log(p[,1:length(x)]))[-1,], 2,
-           function(col) c(exp(sum(col)) - 1,
-                           (lm((col)~diff(log(p[,i]))[-1,]))$coefficients[2]))
+  # Calculate expected return for first row and beta on the second one
+  r<-apply(
+    diff(log(p[,1:length(x)]))[-1,], 2,
+    function(col) c(
+      exp(sum(col)) - 1,
+      lm((col)~diff(log(p[,i]))[-1,])$coefficients[2]
+      )
+    )
   
   treynor <- NULL # Calculate Treynor values
   
   for (k in 1:length(x)){ treynor <- rbind(treynor, (r[1,k] - rf) / r[2,k]) }
   
-  rownames(treynor) <- names(r[2,]) # Add tickers
+  rownames(treynor) <- x # Add tickers
   colnames(treynor) <- "Treynor" # Put name of ratio to column
   
   return(treynor) # Display values
